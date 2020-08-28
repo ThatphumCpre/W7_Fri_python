@@ -2,54 +2,65 @@ class Board() :
     def __init__(self):
         self.listBoard = [[" "," "," "],[" "," "," "],[" "," "," " ]]
         self.player="o"   #start player
-        self.round=1        #starter round
-        self.text = TextInput()  #instance from class  to Input and drawBoard
-        self.printed = Printer()
+
+        self.text = TextInput(self)  #instance from class  to Input and drawBoard
+        self.printed = Printer(self)
 
     def start(self) :
-        self.printed.drawBoard(self)      #draw empty board
-        while(self.winCheck()) :       #check if someone win
-            if self.round > 9:         #if round over 9 then stop
+        self.round=1        #starter round
+        self.printed.drawBoard()      #draw empty board
+        while(self.winCheck(self.player)) :       #check if someone win
+
+            if self.round >= 9:         #if round over 9 then stop
+                print("Draw")
                 break
             if self.round%2==1 :        #swap player
                 self.player = "o"
             else :
                 self.player = "x"
             print("Player",self.player,"Turn ")  #display turn
-            self.text.placeMarker(self.player, self)  #input to the board
-            self.printed.drawBoard(self)          #draw new board
-        if not self.winCheck():                 #if someone wins
-            print("Player",self.player,"win.")
-        else:       #if draw
-            print("Draw")
+            try :
+                position = int(input("insert position : "))
+                if self.text.placeMarker(self.player, position) : #input to the board
+                    self.round +=1
+            except :
+                print("Invalid Input : Try again")
+            self.printed.drawBoard()          #draw new board
 
         if int(input("""Enter "1" to play  again else to stop """))==1 :
             self.clearBoard()
             self.start()
 
-    def getBoard(self,position_x,position_y) :  #getter method
-        return self.listBoard[position_x][position_y]
+    def retrieveValue(self,position) :  #getter method
+        return self.listBoard[int((position-1)/3)][(position-1)%3]
 
-    def setBoard(self,position_x, position_y) :     #setter setBoard
-        self.listBoard[position_x][position_y] = self.player
-        self.round += 1
+    def setBoard(self,player,position) :     #setter setBoard
+        self.listBoard[int((position-1)/3)][(position-1)%3] = player
 
-    def winCheck(self) :  #if someone wins return false to stop loop
+    def winCheck(self,player) :  #if someone wins return false to stop loop
         if self.listBoard[0][0] == self.listBoard[0][1] == self.listBoard[0][2] and self.listBoard[0][2] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[1][0] == self.listBoard[1][1] == self.listBoard[1][2] and self.listBoard[1][2] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[2][0] == self.listBoard[2][1] == self.listBoard[2][2] and self.listBoard[2][2] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[0][0] == self.listBoard[1][0] == self.listBoard[2][0] and self.listBoard[2][0] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[0][1] == self.listBoard[1][1] == self.listBoard[2][1] and self.listBoard[2][1] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[0][2] == self.listBoard[1][2] == self.listBoard[2][2] and self.listBoard[2][2] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[0][0] == self.listBoard[1][1] == self.listBoard[2][2] and self.listBoard[2][2] != " ":
+            print("Player",player,"WINS!")
             return False
         elif self.listBoard[0][2] == self.listBoard[1][1] == self.listBoard[2][0] and self.listBoard[2][0] != " ":
+            print("Player",player,"WINS!")
             return False
         else:
             return True
@@ -58,23 +69,32 @@ class Board() :
         self.listBoard = [[" "," "," "],[" "," "," "],[" "," "," " ]]
 
 class TextInput() :
-    def placeMarker(self, player,obj) :  #input
-        x = int(input("insert x : "))
-        y = int(input("insert y : "))
-        if((x>2 or x<0 or y>2 or y<0)) :  #if is over bound
+    def __init__(self, object) :
+        self.board=object
+    def placeMarker(self, player,position) :  #input
+        if((position<0 or position>9)) :  #if is over bound
             print("Error Insert again")
-        elif (obj.getBoard(x,y)!=" ") :  #if it's overlap
+            return False
+        elif (self.board.retrieveValue(position)!=" ") :  #if it's overlap
             print("Overlap Insert again")
+            return False
         else :
-            obj.setBoard(x, y)  #set to board
+            self.board.setBoard(player, position)  #set to board
+            return True
 
 class Printer() :
-    def drawBoard(self,obj) :  #preview board
-        print(obj.listBoard[0][0] + " | " + obj.listBoard[0][1] + " | " + obj.listBoard[0][2])
-        print("----------")
-        print(obj.listBoard[1][0] + " | " + obj.listBoard[1][1] + " | " + obj.listBoard[1][2])
-        print("----------")
-        print(obj.listBoard[2][0] + " | " + obj.listBoard[2][1] + " | " + obj.listBoard[2][2]+"\n")
+
+    def __init__ (self, object) :
+        self.board=object
+
+class Printer:
+    def __init__(self, board_obj):
+        self.board = board_obj
+
+    def drawBoard(self): ## display board
+        print("\n")
+        for i in range(1,10,3):
+            print(self.board.retrieveValue(i), " | ", self.board.retrieveValue(i+1), " | ", self.board.retrieveValue(i+2))
 
 game1=Board()#instance obj from Board
 game1.start()#start game
